@@ -52,28 +52,43 @@ function clearComplete () {
   return (todos) => todos.filter(todo => !todo.complete);
 }
 
-export default function main ({DOM}) {
+function addTodoAction$ (DOM) {
   const newTodoText$ = DOM
     .select('.new-todo')
     .events('input')
     .map(event => event.target.value);
 
-  const addTodo$ = DOM
+  return DOM
     .select('.add-todo')
     .events('click')
     .withLatestFrom(newTodoText$, (_, todoText) => addTodo(todoText));
+}
 
-  const toggleTodo$ = DOM
+function toggleTodoAction$ (DOM) {
+  return DOM
     .select('.toggle')
     .events('click')
     .map(event => ({complete: event.target.checked, index: event.target.todoId}))
     .map(toggleTodo);
+}
 
-  const clearComplete$ = DOM
+function clearCompleteAction$ (DOM) {
+  return DOM
     .select('.clear-complete')
     .events('click')
     .map(clearComplete);
 
+}
+
+function intent (DOM) {
+  return Rx.Observable.merge(
+    addTodoAction$(DOM),
+    toggleTodoAction$(DOM),
+    clearCompleteAction$(DOM)
+  );
+}
+
+export default function main ({DOM}) {
   const startingTodos = [
     {todo: 'Display todos', complete: true},
     {todo: 'Add todos', complete: true},
@@ -82,20 +97,14 @@ export default function main ({DOM}) {
     {todo: 'Display complete count', complete: false}
   ];
 
-  const action$ = Rx.Observable.merge(
-    addTodo$, toggleTodo$, clearComplete$
-  );
+  const action$ = intent(DOM);
 
   const todos$ = action$
     .startWith(startingTodos)
     .scan((todos, action) => action(todos));
 
   const timeTravel = TimeTravel(DOM, [
-    {stream: todos$, label: 'todos$', feature: true},
-    {stream: addTodo$, label: 'addTodo$'},
-    {stream: newTodoText$, label: 'newTodoText$'},
-    {stream: toggleTodo$, label: 'toggleTodo$'},
-    {stream: clearComplete$, label: 'clearComplete$'}
+    {stream: todos$, label: 'todos$', feature: true}
   ]);
 
   const view$ = timeTravel.timeTravel.todos$.map(todoAppView);
