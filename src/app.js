@@ -16,6 +16,16 @@ function todosView (todos) {
   );
 }
 
+function todoAppView (todos) {
+  return (
+    h('.todo-app', [
+      h('input.new-todo'),
+      h('button.add-todo', 'Add todo'),
+      todosView(todos)
+    ])
+  );
+}
+
 export default function main ({DOM}) {
   const todos$ = Rx.Observable.just([
     {todo: 'Display todos', complete: true},
@@ -23,7 +33,7 @@ export default function main ({DOM}) {
   ]);
 
   return {
-    DOM: todos$.map(todosView)
+    DOM: todos$.map(todoAppView)
   };
 }
 
