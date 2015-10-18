@@ -1,6 +1,8 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
 
+import TimeTravel from 'cycle-time-travel';
+
 function todoView ({todo, complete}) {
   return (
     h('.todo', [
@@ -32,8 +34,16 @@ export default function main ({DOM}) {
     {todo: 'Add todos', complete: false}
   ]);
 
+  const timeTravel = TimeTravel(DOM, [
+    {stream: todos$, label: 'todos$', feature: true}
+  ]);
+
+  const view$ = todos$.map(todoAppView);
+
   return {
-    DOM: todos$.map(todoAppView)
+    DOM: Rx.Observable.combineLatest(view$, timeTravel.DOM,
+      (...vtrees) => h('div', vtrees)
+    )
   };
 }
 
