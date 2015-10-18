@@ -3,11 +3,11 @@ import {h} from '@cycle/dom';
 
 import TimeTravel from 'cycle-time-travel';
 
-function todoView ({todo, complete}) {
+function todoView ({todo, complete}, index) {
   return (
     h('.todo', [
       h('span.title', todo),
-      h('input.complete', {type: 'checkbox', checked: complete})
+      h('input.toggle', {type: 'checkbox', checked: complete, todoId: index})
     ])
   );
 }
@@ -34,6 +34,16 @@ function addTodo (todo) {
   };
 }
 
+function toggleTodo ({complete, index}) {
+  return (todos) => {
+    const newTodos = todos.slice(); // duplicate
+
+    newTodos[index].complete = complete;
+
+    return newTodos;
+  };
+}
+
 export default function main ({DOM}) {
   const newTodoText$ = DOM
     .select('.new-todo')
@@ -45,13 +55,20 @@ export default function main ({DOM}) {
     .events('click')
     .withLatestFrom(newTodoText$, (_, todoText) => addTodo(todoText));
 
+  const toggleTodo$ = DOM
+    .select('.toggle')
+    .events('click')
+    .map(event => ({complete: event.target.checked, index: event.target.todoId}))
+    .map(toggleTodo)
+
   const startingTodos = [
     {todo: 'Display todos', complete: true},
     {todo: 'Add todos', complete: true},
-    {todo: 'Toggle todo', complete: false}
+    {todo: 'Toggle todo', complete: true},
+    {todo: 'Clear complete', complete: false}
   ];
 
-  const action$ = addTodo$;
+  const action$ = addTodo$.merge(toggleTodo$);
 
   const todos$ = action$
     .startWith(startingTodos)
@@ -60,7 +77,8 @@ export default function main ({DOM}) {
   const timeTravel = TimeTravel(DOM, [
     {stream: todos$, label: 'todos$', feature: true},
     {stream: addTodo$, label: 'addTodo$'},
-    {stream: newTodoText$, label: 'newTodoText$'}
+    {stream: newTodoText$, label: 'newTodoText$'},
+    {stream: toggleTodo$, label: 'toggleTodo$'}
   ]);
 
   const view$ = timeTravel.timeTravel.todos$.map(todoAppView);
