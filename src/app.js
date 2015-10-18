@@ -47,7 +47,8 @@ export default function main ({DOM}) {
 
   const startingTodos = [
     {todo: 'Display todos', complete: true},
-    {todo: 'Add todos', complete: false}
+    {todo: 'Add todos', complete: true},
+    {todo: 'Toggle todo', complete: false}
   ];
 
   const action$ = addTodo$;
