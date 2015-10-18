@@ -28,17 +28,41 @@ function todoAppView (todos) {
   );
 }
 
+function addTodo (todo) {
+  return (todos) => {
+    return todos.concat([{todo, complete: false}]);
+  };
+}
+
 export default function main ({DOM}) {
-  const todos$ = Rx.Observable.just([
+  const newTodoText$ = DOM
+    .select('.new-todo')
+    .events('input')
+    .map(event => event.target.value);
+
+  const addTodo$ = DOM
+    .select('.add-todo')
+    .events('click')
+    .withLatestFrom(newTodoText$, (_, todoText) => addTodo(todoText));
+
+  const startingTodos = [
     {todo: 'Display todos', complete: true},
     {todo: 'Add todos', complete: false}
-  ]);
+  ];
+
+  const action$ = addTodo$;
+
+  const todos$ = action$
+    .startWith(startingTodos)
+    .scan((todos, action) => action(todos));
 
   const timeTravel = TimeTravel(DOM, [
-    {stream: todos$, label: 'todos$', feature: true}
+    {stream: todos$, label: 'todos$', feature: true},
+    {stream: addTodo$, label: 'addTodo$'},
+    {stream: newTodoText$, label: 'newTodoText$'}
   ]);
 
-  const view$ = todos$.map(todoAppView);
+  const view$ = timeTravel.timeTravel.todos$.map(todoAppView);
 
   return {
     DOM: Rx.Observable.combineLatest(view$, timeTravel.DOM,
