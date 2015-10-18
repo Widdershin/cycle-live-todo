@@ -1,0 +1,30 @@
+{
+  "name": "cycle-live-todo",
+  "version": "1.0.0",
+  "description": "My livecoding example for my Node.js Wellington Cycle talk",
+  "main": "index.js",
+  "scripts": {
+    "start": "babel-node server.js | garnish",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Widdershin/cycle-live-todo.git"
+  },
+  "author": "Nick Johnstone",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Widdershin/cycle-live-todo/issues"
+  },
+  "homepage": "https://github.com/Widdershin/cycle-live-todo",
+  "devDependencies": {
+    "babelify": "^6.3.0",
+    "browserify-hmr": "^0.3.1",
+    "budo": "^5.1.4",
+    "garnish": "^3.2.1"
+  },
+  "dependencies": {
+    "@cycle/core": "^4.0.0",
+    "@cycle/dom": "^6.0.0"
+  }
+}
