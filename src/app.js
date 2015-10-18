@@ -19,8 +19,11 @@ function todosView (todos) {
 }
 
 function todoAppView (todos) {
+  const completeCount = todos.filter(todo => todo.complete).length;
+
   return (
     h('.todo-app', [
+      h('.complete-count', `Complete: ${completeCount}`),
       h('input.new-todo'),
       h('button.add-todo', 'Add todo'),
       h('div', [h('button.clear-complete', 'Clear Complete')]),
