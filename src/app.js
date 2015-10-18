@@ -80,6 +80,10 @@ function clearCompleteAction$ (DOM) {
 
 }
 
+function view (todos$) {
+  return todos$.map(todoAppView);
+}
+
 function intent (DOM) {
   return Rx.Observable.merge(
     addTodoAction$(DOM),
@@ -88,31 +92,23 @@ function intent (DOM) {
   );
 }
 
-export default function main ({DOM}) {
+function model (action$) {
   const startingTodos = [
     {todo: 'Display todos', complete: true},
     {todo: 'Add todos', complete: true},
     {todo: 'Toggle todo', complete: true},
     {todo: 'Clear complete', complete: true},
-    {todo: 'Display complete count', complete: false}
+    {todo: 'Display complete count', complete: true}
   ];
 
-  const action$ = intent(DOM);
-
-  const todos$ = action$
+  return action$
     .startWith(startingTodos)
     .scan((todos, action) => action(todos));
+}
 
-  const timeTravel = TimeTravel(DOM, [
-    {stream: todos$, label: 'todos$', feature: true}
-  ]);
-
-  const view$ = timeTravel.timeTravel.todos$.map(todoAppView);
-
+export default function main ({DOM}) {
   return {
-    DOM: Rx.Observable.combineLatest(view$, timeTravel.DOM,
-      (...vtrees) => h('div', vtrees)
-    )
+    DOM: view(model(intent(DOM)))
   };
 }
 
