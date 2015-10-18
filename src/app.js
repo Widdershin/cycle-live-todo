@@ -1,8 +1,6 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
 
-import TimeTravel from 'cycle-time-travel';
-
 function todoView ({todo, complete}, index) {
   return (
     h('.todo', [
