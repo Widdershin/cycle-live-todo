@@ -23,6 +23,7 @@ function todoAppView (todos) {
     h('.todo-app', [
       h('input.new-todo'),
       h('button.add-todo', 'Add todo'),
+      h('div', [h('button.clear-complete', 'Clear Complete')]),
       todosView(todos)
     ])
   );
@@ -44,6 +45,10 @@ function toggleTodo ({complete, index}) {
   };
 }
 
+function clearComplete () {
+  return (todos) => todos.filter(todo => !todo.complete);
+}
+
 export default function main ({DOM}) {
   const newTodoText$ = DOM
     .select('.new-todo')
@@ -59,16 +64,24 @@ export default function main ({DOM}) {
     .select('.toggle')
     .events('click')
     .map(event => ({complete: event.target.checked, index: event.target.todoId}))
-    .map(toggleTodo)
+    .map(toggleTodo);
+
+  const clearComplete$ = DOM
+    .select('.clear-complete')
+    .events('click')
+    .map(clearComplete);
 
   const startingTodos = [
     {todo: 'Display todos', complete: true},
     {todo: 'Add todos', complete: true},
     {todo: 'Toggle todo', complete: true},
-    {todo: 'Clear complete', complete: false}
+    {todo: 'Clear complete', complete: true},
+    {todo: 'Display complete count', complete: false}
   ];
 
-  const action$ = addTodo$.merge(toggleTodo$);
+  const action$ = Rx.Observable.merge(
+    addTodo$, toggleTodo$, clearComplete$
+  );
 
   const todos$ = action$
     .startWith(startingTodos)
@@ -78,7 +91,8 @@ export default function main ({DOM}) {
     {stream: todos$, label: 'todos$', feature: true},
     {stream: addTodo$, label: 'addTodo$'},
     {stream: newTodoText$, label: 'newTodoText$'},
-    {stream: toggleTodo$, label: 'toggleTodo$'}
+    {stream: toggleTodo$, label: 'toggleTodo$'},
+    {stream: clearComplete$, label: 'clearComplete$'}
   ]);
 
   const view$ = timeTravel.timeTravel.todos$.map(todoAppView);
